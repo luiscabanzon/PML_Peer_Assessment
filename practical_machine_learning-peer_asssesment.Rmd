@@ -1,0 +1,85 @@
+---
+title: "Peer Assessment - Practical Machine Learning"
+author: "Luis Cabanzon"
+date: "22/02/2015"
+output: html_document
+---
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+First of all, I would like to thank Groupware@LESS for sharing this data. Thanks to these contributions, many people have access to real data that can be used during their training and investigations. Kindly find further details [here](http://groupware.les.inf.puc-rio.br/har).
+
+We will work with the this csv file. There is also another file without the outcome column ("classes"), that can be used to predic these missing values. Here I'll only take the latter into consideration to determine which are the values I van really choose to build a valid model.
+
+## Loading and cleaning data
+```{r}
+library(knitr)
+library(caret)
+library(randomForest)
+
+data_training <- read.csv("~/Downloads/pml-training.csv")
+data_testing <- read.csv("~/Downloads/pml-testing.csv")
+```
+
+After a quick peek, it's relevant to mention that most of data in many columns are missing, so they cannot be used in our model. Furthermore, some of the first columns are not relevant for a prediction model, as the timestamp data or the user. Saying this, we will remove these columns, by identifying those which are really valid:
+
+```{r}
+valid_columns <- c()
+for (i in colnames(data_training)[-160]) {
+  # [-160] Used to exclude last column, "classes"
+  if((sum(is.na(data_training[,i]))/ length(data_training[,i]) ) < 0.7) {
+    if ((sum(is.na(data_testing[,i])))/ length(data_testing[,i]) < 0.7) {
+      valid_columns <- c(valid_columns, i)
+    }
+  }
+}
+valid_columns <- valid_columns[-(1:7)]
+# To remove that columns related with timestamp data or the user
+```
+
+So finally we have `r length(valid_columns)` variables to work with (plus the outcome variable, "classes").
+
+Before starting to build or model, we will slice the data set and split it into to parts, **training** and **testing**.
+
+
+```{r}
+data <- data_training[,c(valid_columns, "classe")]
+set.seed(2015)
+inTrain <- createDataPartition(y = data$classe, p = 0.7, list = FALSE)
+training <- data[inTrain,]
+testing <- data[-inTrain,]
+```
+
+## Prediction Model Training & Review
+
+To build and train our model, we will use the [random forest](en.wikipedia.org/wiki/Random_forest) method. Even though it requires a significant computational effort compared with others, it is one of the most effective and powerfull among the most commonly used. Also, there is no need to do any cross-validation, as it is already inherited into its process.
+
+```{r}
+model <- randomForest(classe ~ . , data = training) ; model
+```
+
+As we can see on the confusion matrix, the model is quite accurate. The error rate has been `r sum(model$confusion[,6]) * 100`%.
+
+We could try to refine the model by repeating the training with less variable, only the most important ones. To identify the importance of each variable with the **varImp()** function (from the caret package) or **importance()** (from randomForest).
+
+```{r}
+var_importance <- varImp(model)[order(var_importance$Overall,
+                                      decreasing = TRUE),, drop = FALSE]
+head(var_importance, 10)
+```
+
+**roll_belt** and **yaw_belt** are clearly the most important variables, so maybe the model could be rebuilt with less variables. In fact, maybe a decission tree could be also quite effective in this case.
+
+## Testing
+Of course, this accuracy might be lower if we try our model with other data. That's why now we'll put it to the test with the remaining data, the testing part.
+
+```{r}
+prediction <- predict(model, newdata = testing)
+accuracy <- confusionMatrix(prediction, testing$classe); print(accuracy)
+```
+
+Well, not bad... The accuracy is around `r as.numeric(accuracy$overall[1]) * 100`% and the kappa `r as.numeric(accuracy$overall[2]) * 100`. Even if it's not 100%, this is a very good result. Probably most of the fails are cause by outliers, and we can always expect to predict every single "black swan".
+
+So that's it. We have built a strong model easily. But other algorithms could do a great job here (e.g. a decision tree).
