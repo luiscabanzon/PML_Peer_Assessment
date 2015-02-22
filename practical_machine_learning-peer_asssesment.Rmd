@@ -10,7 +10,7 @@ First of all, I would like to thank Groupware@LESS for sharing this data. Thanks
 We will work with [this](https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv) csv file. There is also [another file](https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv) without the outcome column ("classes"), that can be used to predic these missing values. Here I'll only take the latter into consideration to determine which are the values I van really choose to build a valid model.
 
 ## Loading and cleaning data
-```{r}
+```{r echo = FALSE}
 library(knitr)
 library(caret)
 library(randomForest)
@@ -76,6 +76,6 @@ prediction <- predict(model, newdata = testing)
 accuracy <- confusionMatrix(prediction, testing$classe); print(accuracy)
 ```
 
-Well, not bad... The accuracy is around `r as.numeric(accuracy$overall[1]) * 100`% and the kappa `r as.numeric(accuracy$overall[2]) * 100`. Even if it's not 100%, this is a very good result. Probably most of the fails are cause by outliers, and we can always expect to predict every single "black swan".
+Well, not bad... The accuracy is around `r as.numeric(accuracy$overall[1]) * 100`% and the kappa `r as.numeric(accuracy$overall[2]) * 100`%. Even if it's not 100%, this is a very good result. Probably most of the fails are cause by outliers, and we can always expect to predict every single "black swan".
 
 So that's it. We have built a strong model easily. But other algorithms could do a great job here (e.g. a decision tree).

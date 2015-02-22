@@ -63,15 +63,10 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 <p>We will work with <a href="https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv">this</a> csv file. There is also <a href="https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv">another file</a> without the outcome column (“classes”), that can be used to predic these missing values. Here I’ll only take the latter into consideration to determine which are the values I van really choose to build a valid model.</p>
 <div id="loading-and-cleaning-data" class="section level2">
 <h2>Loading and cleaning data</h2>
-<pre class="r"><code>library(knitr)
-library(caret)</code></pre>
 <pre><code>## Loading required package: lattice
-## Loading required package: ggplot2</code></pre>
-<pre class="r"><code>library(randomForest)</code></pre>
-<pre><code>## randomForest 4.6-10
+## Loading required package: ggplot2
+## randomForest 4.6-10
 ## Type rfNews() to see new features/changes/bug fixes.</code></pre>
-<pre class="r"><code>data_training &lt;- read.csv(&quot;~/Downloads/pml-training.csv&quot;)
-data_testing &lt;- read.csv(&quot;~/Downloads/pml-testing.csv&quot;)</code></pre>
 <p>After a quick peek, it’s relevant to mention that most of data in many columns are missing, so they cannot be used in our model. Furthermore, some of the first columns are not relevant for a prediction model, as the timestamp data or the user. Saying this, we will remove these columns, by identifying those which are really valid:</p>
 <pre class="r"><code>valid_columns &lt;- c()
 for (i in colnames(data_training)[-160]) {
@@ -165,7 +160,7 @@ accuracy &lt;- confusionMatrix(prediction, testing$classe); print(accuracy)</cod
 ## Detection Rate         0.2843   0.1918   0.1735   0.1628   0.1833
 ## Detection Prevalence   0.2855   0.1924   0.1754   0.1633   0.1835
 ## Balanced Accuracy      0.9989   0.9953   0.9964   0.9966   0.9985</code></pre>
-<p>Well, not bad… The accuracy is around 99.5751912% and the kappa 99.4626113. Even if it’s not 100%, this is a very good result. Probably most of the fails are cause by outliers, and we can always expect to predict every single “black swan”.</p>
+<p>Well, not bad… The accuracy is around 99.5751912% and the kappa 99.4626113%. Even if it’s not 100%, this is a very good result. Probably most of the fails are cause by outliers, and we can always expect to predict every single “black swan”.</p>
 <p>So that’s it. We have built a strong model easily. But other algorithms could do a great job here (e.g. a decision tree).</p>
 </div>
 
