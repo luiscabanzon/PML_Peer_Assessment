@@ -5,13 +5,9 @@ date: "22/02/2015"
 output: html_document
 ---
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
 First of all, I would like to thank Groupware@LESS for sharing this data. Thanks to these contributions, many people have access to real data that can be used during their training and investigations. Kindly find further details [here](http://groupware.les.inf.puc-rio.br/har).
 
-We will work with the this csv file. There is also another file without the outcome column ("classes"), that can be used to predic these missing values. Here I'll only take the latter into consideration to determine which are the values I van really choose to build a valid model.
+We will work with [this](https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv) csv file. There is also [another file](https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv) without the outcome column ("classes"), that can be used to predic these missing values. Here I'll only take the latter into consideration to determine which are the values I van really choose to build a valid model.
 
 ## Loading and cleaning data
 ```{r}
@@ -65,9 +61,9 @@ As we can see on the confusion matrix, the model is quite accurate. The error ra
 We could try to refine the model by repeating the training with less variable, only the most important ones. To identify the importance of each variable with the **varImp()** function (from the caret package) or **importance()** (from randomForest).
 
 ```{r}
-var_importance <- varImp(model)[order(var_importance$Overall,
-                                      decreasing = TRUE),, drop = FALSE]
-head(var_importance, 10)
+var_importance <- varImp(model)
+head(var_importance[order(var_importance$Overall,
+                                      decreasing = TRUE),, drop = FALSE], 10)
 ```
 
 **roll_belt** and **yaw_belt** are clearly the most important variables, so maybe the model could be rebuilt with less variables. In fact, maybe a decission tree could be also quite effective in this case.
